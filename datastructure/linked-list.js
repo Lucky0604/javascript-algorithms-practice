@@ -26,7 +26,7 @@
            Previous node.
            @member {Node}
         */
-        this.previous = null;
+        this.prev = null;
     };
 
     /**
@@ -247,4 +247,5 @@
         this.first = prev;
         this.last = temp;
     };
+    
 })(typeof window === 'undefined' ? module.exports: window);

@@ -14,3 +14,5 @@ linkedList.push({
 });
 console.log(linkedList.shift().data);
 console.log(linkedList.pop().data);
+console.log(linkedList);
+console.log(linkedList.indexOf({name: 'Pavlo', birthYear: 2000}));
