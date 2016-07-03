@@ -194,4 +194,85 @@
      * @param {Number|String} [value] [Node value]
      * @param {Node} [current] [Current node]
      */
+    exports.SplayTree.prototype.insert = function(value, current) {
+        if (this._root === null) {
+            this._root = new exports.Node(value, null, null, null);
+            return;
+        }
+        var insertKey;
+        current = current || this._root;
+        if (current.value > value) {
+            insertKey = '_left';
+        } else {
+            insertKey = '_right';
+        }
+        if (!current[insertKey]) {
+            current[insertKey] = new exports.Node(value, null, null, current);
+            this._splay(current[insertKey]);
+        } else {
+            this.insert(value, current[insertKey]);
+        }
+    };
+
+
+    /**
+     * In-order traversal from the given node
+     *
+     * @private
+     * @param {Node} current Node from which to start the traversal
+     * @param {Function} call back Callback which will be called for each traversed node.
+     */
+    exports.SplayTree.prototype._inorder = function(current, callback) {
+        if (!current) {
+            return;
+        }
+        this._inorder(current._left, callback);
+        if (typeof callback === 'function') {
+            callback(current);
+        }
+        this._inorder(current._right, callback);
+    };
+
+
+    /**
+     * In-order traversal of the whole Splay tree
+     *
+     * @public
+     * @method 
+     * @param {Function} callback Callback which will be called for each traversed node.
+     */
+    exports.SplayTree.prototype.inorder = function(callback) {
+        return this._inorder(this._root, callback);
+    }
+
+
+    /**
+     * Post-order traversal from given node
+     *
+     * @private
+     * @param {Node} current Node from which to start the traversal
+     * @param {Function} callback Callback which will be called for each traversed node
+     */
+    exports.SplayTree.prototype._postorder = function(current, callback) {
+        if (!current) {
+            return;
+        }
+        if (typeof callback === 'function') {
+            callback(current);
+        }
+        this._postorder(current._left, callback);
+        this._postorder(current._right, callback);
+    };
+
+
+    /**
+     * Post-order traversal of the whole tree
+     *
+     * @public
+     * @param {Function} callback Callback which will be called for each traversed node
+     */
+    exports.SplayTree.prototype.postorder = function(callback) {
+        return this._postorder(this._root, callback);
+    };
+
 })
