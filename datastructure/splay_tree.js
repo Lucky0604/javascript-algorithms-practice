@@ -353,4 +353,211 @@
             return this._search(value, current._right);
         }
     };
-})
+
+
+    /**
+     * Replaces given child with new one. for given parent.
+     *
+     * @private
+     * @param {Node} parent Parent node.
+     * @param {Node} oldChild Child to be replaced
+     * @param {Node} newChild Child replacement
+     */
+    exports.SplayTree.prototype._replaceChild = fucntion(parent, oldChild, newChild) {
+        if (!parent) {
+            this._root = newChild;
+            this._root._parent = null;
+        } else {
+            if (parent._left === oldChild) {
+                parent._left = newChild;
+            } else {
+                parent._right = newChild;
+            }
+
+            if (newChild) {
+                newChild._parent = parent;
+            }
+        }
+    };
+
+
+    /**
+     * Removes node with given value from the tree
+     * Average runtime complexity: O(log N)
+     * 
+     * @public
+     * @param {Number|String} value Value to be removed
+     * @returns {Boolean} True/False depending on whether the given node is removed
+     */
+    exports.SplayTree.prototype.remove = function(value) {
+        var node = this._splaylessSearch(value);
+        if (!node) {
+            return false;
+        }
+        if (node._left && node._right) {
+            var min = this._findMin(node._right);
+            var temp = node.value;
+
+            node.value = min.value;
+            min.value = temp;
+            return this.remove(min);
+        } else {
+            if (node._parent !== null) {
+
+            
+               if (node._left) {
+                    this._replaceChild(node._parent, node, node._left);
+                } else if (node._right) {
+                    this._replaceChild(node._parent, node, node._right);
+                } else {
+                    this._replaceChild(node._parent, node, null);
+                }
+                this._splay(node._parent);
+            } else {
+                this._root = null;
+            }
+            return true;
+        }
+    };
+
+
+    /**
+     * Finds the node with minimum value in given sub-tree
+     *
+     * @private
+     * @param {Node} node Root of the sub-tree
+     * @param {Number|String} current Current minimum value of the sub-tree
+     * @returns {Node} Node with the minimum value in the sub-tree
+     */
+    exports.SplayTree.prototype._findMin = function(node, current) {
+
+        current = current || {value: Infinity};
+        if (!node) {
+            return current;
+        }
+        if (current.value > node.value) {
+            current = node;
+        }
+        return this._findMin(node._left, current);
+
+    };
+
+    exports.SplayTree.prototype._isBalanced = function(current) {
+        if (!current) {
+            return true;
+        }
+        return this._isBalanced(current._left) && this._isBalanced(current._right) && Math.abs(this._getHeight(current._left) - this._getHeight(current._right)) <= 1;
+    };
+
+    /**
+     * Returns whether the Splay tree is balanced
+     *
+     * @public
+     * @returns {Boolean} Whether the tree is balanced or not
+     */
+    exports.SplayTree.prototype.isBalanced = function() {
+        return this._isBalanced(this._root);
+    };
+
+
+    /**
+     * Finds the diameter of the Splay tree
+     *
+     * @public
+     * @returns {Number} The longest path in the tree
+     */
+    exports.SplayTree.prototype.getDiameter = function() {
+        var getDiameter = function(root) {
+            if (!root) {
+                return 0;
+            }
+            var leftHeight = this._getHeight(root._left);
+            var rightHeight = this._getHeight(root._right);
+            var path = leftHeight + rightHeight + 1;
+            return Math.max(path, getDiameter(root._left), getDiameter(root._right));
+        }.bind(this);
+        return getDiameter(this._root);
+    };
+
+
+    /**
+     * Returns the height of the tree
+     *
+     * @public
+     * @returns {Number} The height of the tree
+     */
+    exports.SplayTree.prototype.getHeight = function() {
+        return this._getHeight(this._root);
+    };
+
+    /**
+     * Recursive worker function for getHeight()
+     *
+     * @public
+     * @param {Node} node The node of the current recursive frame
+     * @returns {Number} The height of the tree
+     */
+    exports.SplayTree.prototype._getHeight = function(node) {
+        if (!node) {
+            return 0;
+        }
+        return 1 + Math.max(this._getHeight(node._left), this._getHeight(node._right));
+    };
+    
+
+    /**
+     * Finds the lowest common ancestor of two nodes
+     *
+     * @public
+     * @returns {Node} The lowest common ancestor of the two nodes or null
+     */
+    exports.SplayTree.prototype.lowestCommonAncestor = function(firstNode, secondNode) {
+        return this._lowestCommonAncestor(firstNode, secondNode, this._root);
+    };
+
+
+    /**
+     * Obtains the lowest common ancestor for the given nodes
+     *
+     * @private
+     * @param {Node} firstNode First node to be considered when checking for ancestor
+     * @param {Node} secondNode Second node to be considered when checking for ancestor
+     * @param {Node} current Current node
+     * @returns {Node} the lowest common ancestor of the two nodes or null
+     */
+    exports.SplayTree.prototype._lowestCommonAncestor = function(firstNode, secondNode, current) {
+        var firstNodeInLeft = this._existsInSubtree(firstNode, current._left);
+        var secondNodeInLeft = this._existsInSubtree(secondNode, current._left);
+        var firstNodeInRight = this._existsInSubtree(firstNode, current._right);
+        var secondNodeInRight = this._existsInSubtree(secondNode, current._right);
+        if ((firstNodeInLeft && secondNodeInRight) || (firstNodeInRight && secondNodeInLeft)) {
+            return current;
+        }
+        if (secondNodeInLeft && firstNodeInLeft) {
+            return this._lowestCommonAncestor(firstNode, secondNode, current._left);
+        }
+        if (secondNodeInRight && secondNodeInLeft) {
+            return this._lowestCommonAncestor(firstNode, secondNode, current._right);
+        }
+        return null;
+    };
+
+
+    /**
+     * Checks if a given node exists in a subtree
+     *
+     * @private
+     * @param {Node} node Node to check for
+     * @param {Node} root Root node of a given subtree
+     * @returns {Node} The lowest common ancestor of the two nodes or null
+     */
+    exports.SplayTree.prototype._existsInSubtree = function(node, root) {
+        if (!root) {
+            return false;
+        }
+        if (node === root.value) {
+            return true;
+        }
+        return this._existsInSubtree(node, root._left) || this._existsInSubtree(node, root._right);
+    };
+})(typeof window === 'undefined' ? module.exports: window);
