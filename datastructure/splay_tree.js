@@ -152,5 +152,46 @@
         return node;
     };
 
+    /**
+     * Performs a zig splay parttern
+     *
+     * @private
+     * @method 
+     * @param { Node} node Node to be a zig'd
+     * @returns { Node} [The same node from the parameter, post splayed]
+     */
+    exports.SplayTree.prototype._zig = function(node) {
+        var parent = node._parent;
+        var orientation = (parent._right === node) ? '_right': '_left';
+        var oppositeOrientation = (orientation === '_right') ? '_left': '_right';
 
+        if (this._root === parent) {
+            this._root = node;
+        }
+
+        // fix parent
+        parent[orientation] = node[oppositeOrientation];
+        if (parent[orientation] !== null) {
+            parent[orientation]._parent = parent;
+        }
+        parent._parent = node;
+
+        // fix cur node
+        node[oppositeOrientation] = parent;
+        node._parent = null;
+
+        return node;
+    };
+
+
+    /**
+     * Insert a node into the splay tree.
+     * Time complexity: O(log N) in the average case
+     * and amortized O(log n) in the worst case.
+     *
+     * @public
+     * @method 
+     * @param {Number|String} [value] [Node value]
+     * @param {Node} [current] [Current node]
+     */
 })
