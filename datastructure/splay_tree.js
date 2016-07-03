@@ -275,4 +275,82 @@
         return this._postorder(this._root, callback);
     };
 
+
+    /**
+     * Pre-order traversal of the tree from given node
+     *
+     * @private
+     * @param {Node} current Node from which to start the traversal
+     * @param {Function} callback Callback which will be called for each traversed node. 
+     */
+    exports.SplayTree.prototype._preorder = function(current, callback) {
+        if (!current) {
+            return;
+        }
+        if (typeof callback === 'function') {
+            callback(current);
+        }
+        this._preorder(current._left, callback);
+        this._preorder(current._right, callback);
+    };
+
+
+    /**
+     * Pre-order preorder traversal of the whole tree
+     *
+     * @public
+     * @param {Function} callback Callback which will be called for each traversed node.
+     */
+    exports.SplayTree.prototype.preorder = function(callback) {
+        return this._preorder(this._root, callback);
+    };
+
+
+    /**
+     * Finds a node by it's value.
+     * Average time complexity: O(log N)
+     *
+     * @public
+     * @param {Number|String} value of the node which should be found
+     */
+    exports.SplayTree.prototype.search = function(value) {
+        var node = this._search(value, this._root);
+        return this._splay(node);
+    }
+
+
+    /**
+     * Finds a node by it's value
+     * Average time complexity: O(log N)
+     *
+     * @public
+     * @param {Number|String} value of the node which should be found
+     */
+    exports.SplayTree.prototype._splaylessSearch = function(value) {
+        return this._search(value, this._root);
+    }
+
+
+    /**
+     * Finds a node by it's value in a given sub-tree
+     * Average time complexity: O(log N)
+     *
+     * @private
+     * @param {Number|String} value of the node which should be found
+     * @param {Node} current node to be checked
+     */
+    exports.SplayTree.prototype._search = function(value, current) {
+        if (!current) {
+            return null;
+        }
+        if (current.value === value) {
+            return current;
+        }
+        if (current.value > value) {
+            return this._search(value, current._left);
+        }
+        if (current.value < value) {
+            return this._search(value, current._right);
+        }
+    };
 })
